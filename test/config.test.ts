@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { readDbConfig, MissingConfigError } from "../src/config.js";
+import { createDbPools } from "../src/index.js";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -149,5 +150,28 @@ describe("readDbConfig", () => {
     expect(auth.database).toBe("auth");
 
     clearEnv("AUTH_DB");
+  });
+
+  it("uses readable pool keys for DB-suffixed prefixes", async () => {
+    setEnv({
+      MARKET_RAW_DB_HOST: "pg.example.com",
+      MARKET_RAW_DB_NAME: "market_raw",
+      MARKET_RAW_DB_USER: "techdeals",
+      MARKET_RAW_DB_PASSWORD: "secret",
+      TECHDEALS_WORK_DB_HOST: "pg.example.com",
+      TECHDEALS_WORK_DB_NAME: "techdeals_work",
+      TECHDEALS_WORK_DB_USER: "techdeals",
+      TECHDEALS_WORK_DB_PASSWORD: "secret",
+    });
+
+    const pools = createDbPools({
+      prefixes: ["MARKET_RAW_DB", "TECHDEALS_WORK_DB"],
+    });
+
+    expect(Object.keys(pools).sort()).toEqual(["marketRaw", "techdealsWork"]);
+
+    await Promise.all(Object.values(pools).map(async (pool) => pool.end()));
+    clearEnv("MARKET_RAW_DB");
+    clearEnv("TECHDEALS_WORK_DB");
   });
 });

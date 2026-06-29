@@ -57,11 +57,15 @@ export function createDbPools(
 ): Record<string, Pool> {
   const pools: Record<string, Pool> = {};
   for (const prefix of options.prefixes) {
-    // Use the last segment of the prefix as the key (e.g. "HANGAR_DB" → "hangarDb")
-    const key = prefix
-      .toLowerCase()
-      .replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+    const key = prefixToPoolKey(prefix);
     pools[key] = createDbPool({ prefix, overrides: options.overrides });
   }
   return pools;
+}
+
+function prefixToPoolKey(prefix: string): string {
+  return prefix
+    .toLowerCase()
+    .replace(/_db$/u, "")
+    .replace(/_([a-z])/gu, (_, c: string) => c.toUpperCase());
 }
