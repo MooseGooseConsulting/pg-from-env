@@ -1,0 +1,56 @@
+{
+  "name": "pg-from-env",
+  "version": "0.1.0",
+  "description": "The boring Postgres pool factory. One function call per database, named env prefixes, nothing clever.",
+  "license": "MIT",
+  "author": "coldaine",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build",
+    "lint": "eslint .",
+    "check": "npm run lint && npm run build && npm test"
+  },
+  "peerDependencies": {
+    "pg": "^8.0.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.20.0",
+    "eslint": "^10.6.0",
+    "globals": "^17.7.0",
+    "pg": "^8.22.0",
+    "typescript": "^5.7.0",
+    "typescript-eslint": "^8.62.1",
+    "vitest": "^3.0.0"
+  },
+  "keywords": [
+    "postgres",
+    "pg",
+    "pool",
+    "env",
+    "config",
+    "database",
+    "connection",
+    "ssl",
+    "tls"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/coldaine/pg-from-env.git"
+  }
+}
