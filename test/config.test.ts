@@ -192,4 +192,10 @@ describe("readDbConfig", () => {
     await Promise.all(Object.values(pools).map(async (pool) => pool.end()));
     clearEnv("PG18_DB");
   });
+
+  it("throws before creating pools when derived keys collide", () => {
+    expect(() => {
+      createDbPools({ prefixes: ["AUTH_DB", "AUTH"] });
+    }).toThrow(/Duplicate pool key "auth"/);
+  });
 });
