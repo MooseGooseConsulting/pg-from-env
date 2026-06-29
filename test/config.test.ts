@@ -174,4 +174,22 @@ describe("readDbConfig", () => {
     clearEnv("MARKET_RAW_DB");
     clearEnv("TECHDEALS_WORK_DB");
   });
+
+  it("handles numeric segments in prefixes (e.g. PG18_DB)", async () => {
+    setEnv({
+      PG18_DB_HOST: "pg18.example.com",
+      PG18_DB_NAME: "postgres",
+      PG18_DB_USER: "admin",
+      PG18_DB_PASSWORD: "password",
+    });
+
+    const pools = createDbPools({
+      prefixes: ["PG18_DB"],
+    });
+
+    expect(Object.keys(pools)).toEqual(["pg18"]);
+
+    await Promise.all(Object.values(pools).map(async (pool) => pool.end()));
+    clearEnv("PG18_DB");
+  });
 });

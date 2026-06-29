@@ -67,5 +67,5 @@ function prefixToPoolKey(prefix: string): string {
   return prefix
     .toLowerCase()
     .replace(/_db$/u, "")
-    .replace(/_([a-z])/gu, (_, c: string) => c.toUpperCase());
+    .replace(/_([a-z0-9])/gu, (_, c: string) => c.toUpperCase());
 }
