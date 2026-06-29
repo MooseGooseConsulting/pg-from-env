@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { readDbConfig, MissingConfigError } from "../src/config.js";
+import { createDbPools } from "../src/index.js";
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -149,5 +150,52 @@ describe("readDbConfig", () => {
     expect(auth.database).toBe("auth");
 
     clearEnv("AUTH_DB");
+  });
+
+  it("uses readable pool keys for DB-suffixed prefixes", async () => {
+    setEnv({
+      MARKET_RAW_DB_HOST: "pg.example.com",
+      MARKET_RAW_DB_NAME: "market_raw",
+      MARKET_RAW_DB_USER: "techdeals",
+      MARKET_RAW_DB_PASSWORD: "secret",
+      TECHDEALS_WORK_DB_HOST: "pg.example.com",
+      TECHDEALS_WORK_DB_NAME: "techdeals_work",
+      TECHDEALS_WORK_DB_USER: "techdeals",
+      TECHDEALS_WORK_DB_PASSWORD: "secret",
+    });
+
+    const pools = createDbPools({
+      prefixes: ["MARKET_RAW_DB", "TECHDEALS_WORK_DB"],
+    });
+
+    expect(Object.keys(pools).sort()).toEqual(["marketRaw", "techdealsWork"]);
+
+    await Promise.all(Object.values(pools).map(async (pool) => pool.end()));
+    clearEnv("MARKET_RAW_DB");
+    clearEnv("TECHDEALS_WORK_DB");
+  });
+
+  it("handles numeric segments in prefixes (e.g. PG18_DB)", async () => {
+    setEnv({
+      PG18_DB_HOST: "pg18.example.com",
+      PG18_DB_NAME: "postgres",
+      PG18_DB_USER: "admin",
+      PG18_DB_PASSWORD: "password",
+    });
+
+    const pools = createDbPools({
+      prefixes: ["PG18_DB"],
+    });
+
+    expect(Object.keys(pools)).toEqual(["pg18"]);
+
+    await Promise.all(Object.values(pools).map(async (pool) => pool.end()));
+    clearEnv("PG18_DB");
+  });
+
+  it("throws before creating pools when derived keys collide", () => {
+    expect(() => {
+      createDbPools({ prefixes: ["AUTH_DB", "AUTH"] });
+    }).toThrow(/Duplicate pool key "auth"/);
   });
 });

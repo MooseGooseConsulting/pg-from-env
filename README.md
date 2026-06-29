@@ -64,6 +64,10 @@ Throws `MissingConfigError` with a clear message when a required variable is mis
 MissingConfigError: HANGAR_DB_HOST is required. Set it in your environment or pass it as an override.
 ```
 
+## Project use cases
+
+See [docs/use-cases.md](docs/use-cases.md) for how this package should fit RobotOverview/Hangar, TechdealsHandoff, and the coldaine-k8cluster database contract.
+
 ## Installation
 
 ```bash

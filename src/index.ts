@@ -55,13 +55,34 @@ export function createDbPool(options: CreatePoolOptions): Pool {
 export function createDbPools(
   options: CreatePoolsOptions,
 ): Record<string, Pool> {
-  const pools: Record<string, Pool> = {};
+  const keys = new Map<string, string>();
+  const entries: { key: string; prefix: string }[] = [];
+
   for (const prefix of options.prefixes) {
-    // Use the last segment of the prefix as the key (e.g. "HANGAR_DB" → "hangarDb")
-    const key = prefix
-      .toLowerCase()
-      .replace(/_([a-z])/g, (_, c: string) => c.toUpperCase());
+    const key = prefixToPoolKey(prefix);
+
+    const existingPrefix = keys.get(key);
+    if (existingPrefix) {
+      throw new Error(
+        `Duplicate pool key ${JSON.stringify(key)} derived from prefixes ${JSON.stringify(existingPrefix)} and ${JSON.stringify(prefix)}. Use distinct prefixes.`,
+      );
+    }
+
+    keys.set(key, prefix);
+    entries.push({ key, prefix });
+  }
+
+  const pools: Record<string, Pool> = {};
+  for (const { key, prefix } of entries) {
     pools[key] = createDbPool({ prefix, overrides: options.overrides });
   }
+
   return pools;
+}
+
+function prefixToPoolKey(prefix: string): string {
+  return prefix
+    .toLowerCase()
+    .replace(/_db$/u, "")
+    .replace(/_([a-z0-9])/gu, (_, c: string) => c.toUpperCase());
 }
